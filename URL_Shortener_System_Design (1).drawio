@@ -1,0 +1,348 @@
+<mxfile host="app.diagrams.net" agent="Claude" pages="4">
+  <diagram id="overview_flow" name="1. Request Flow">
+    <mxGraphModel dx="1288" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1b2a4a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=20;align=center;" value="Shorty — URL Shortener: End-to-End Request Flow" vertex="1">
+          <mxGeometry height="55" width="1220" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_write" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fdf2e9;strokeColor=#e07b39;fontStyle=1;fontSize=14;startSize=30;verticalAlign=top;" value="WRITE PATH — Creating a short link" vertex="1">
+          <mxGeometry height="300" width="1220" x="40" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="w_client" parent="lane_write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;" value="Client&#xa;(browser / SDK / curl)" vertex="1">
+          <mxGeometry height="70" width="150" x="30" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="w_gateway" parent="lane_write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;" value="API Gateway&#xa;(auth, rate-limit)" vertex="1">
+          <mxGeometry height="70" width="150" x="240" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="w_validate" parent="lane_write" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=11;" value="Valid URL&#xa;&amp; alias free?" vertex="1">
+          <mxGeometry height="90" width="140" x="450" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w_idgen" parent="lane_write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;" value="ID Generator&#xa;(Snowflake / counter)" vertex="1">
+          <mxGeometry height="70" width="150" x="650" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="w_encode" parent="lane_write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;" value="Base62 Encoder&#xa;id → short_code" vertex="1">
+          <mxGeometry height="70" width="150" x="860" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="w_db" parent="lane_write" style="cylinder3;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;boundedLbl=1;" value="Primary DB&#xa;(sharded)" vertex="1">
+          <mxGeometry height="90" width="110" x="1070" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="w_error" parent="lane_write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fbe4e4;strokeColor=#c0392b;fontSize=11;" value="400 Bad Request /&#xa;409 Alias Taken" vertex="1">
+          <mxGeometry height="60" width="140" x="450" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="we1" edge="1" parent="lane_write" source="w_client" style="html=1;fontSize=10;" target="w_gateway" value="1. POST /api/v1/links">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="we2" edge="1" parent="lane_write" source="w_gateway" style="html=1;fontSize=10;" target="w_validate" value="2. forward">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="we3" edge="1" parent="lane_write" source="w_validate" style="html=1;fontSize=10;" target="w_idgen" value="yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="we3b" edge="1" parent="lane_write" source="w_validate" style="html=1;fontSize=10;" target="w_error" value="no">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="we4" edge="1" parent="lane_write" source="w_idgen" style="html=1;fontSize=10;" target="w_encode" value="3. unique id">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="we5" edge="1" parent="lane_write" source="w_encode" style="html=1;fontSize=10;" target="w_db" value="4. persist row">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_read" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontStyle=1;fontSize=14;startSize=30;verticalAlign=top;" value="READ PATH — Resolving a short link (hot path)" vertex="1">
+          <mxGeometry height="300" width="1220" x="40" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="r_client" parent="lane_read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;" value="Client clicks&#xa;short.ly/abc123" vertex="1">
+          <mxGeometry height="70" width="150" x="30" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="r_cdn" parent="lane_read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;" value="Edge / CDN&#xa;(nearest PoP)" vertex="1">
+          <mxGeometry height="70" width="150" x="240" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="r_app" parent="lane_read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;" value="Redirect Service" vertex="1">
+          <mxGeometry height="70" width="150" x="450" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="r_cache" parent="lane_read" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=11;" value="In Redis&#xa;cache?" vertex="1">
+          <mxGeometry height="90" width="130" x="660" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="r_db" parent="lane_read" style="cylinder3;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;" value="Primary DB&#xa;(sharded)" vertex="1">
+          <mxGeometry height="90" width="110" x="870" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="r_analytics" parent="lane_read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;dashed=1;" value="Analytics&#xa;Event Queue (async)" vertex="1">
+          <mxGeometry height="70" width="160" x="1010" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="r_301" parent="lane_read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f8f0;strokeColor=#1b7f79;fontSize=11;" value="301/302 redirect&#xa;to long_url" vertex="1">
+          <mxGeometry height="60" width="150" x="450" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="re1" edge="1" parent="lane_read" source="r_client" style="html=1;fontSize=10;" target="r_cdn" value="1. GET /abc123">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re2" edge="1" parent="lane_read" source="r_cdn" style="html=1;fontSize=10;" target="r_app" value="2. miss, forward">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re3" edge="1" parent="lane_read" source="r_app" style="html=1;fontSize=10;" target="r_cache" value="3. lookup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re4" edge="1" parent="lane_read" source="r_cache" style="html=1;fontSize=10;" target="r_db" value="cache miss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re5" edge="1" parent="lane_read" source="r_cache" style="html=1;fontSize=10;" target="r_301" value="cache hit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="re6" edge="1" parent="lane_read" source="r_app" style="html=1;fontSize=10;dashed=1;" target="r_analytics" value="4. fire-and-forget">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;fontSize=11;align=left;fontColor=#555555;" value="Orange lane = write (create link) · Teal lane = read (redirect). Dashed edge = asynchronous, non-blocking call." vertex="1">
+          <mxGeometry height="30" width="700" x="40" y="740" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="component_architecture" name="2. Component Architecture">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1b2a4a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=20;align=center;" value="Shorty — Layered Component Architecture" vertex="1">
+          <mxGeometry height="55" width="1220" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="l_client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dfe6f0;strokeColor=#1b2a4a;fontStyle=1;fontSize=13;" value="Clients: Web App · Mobile App · Public REST API consumers" vertex="1">
+          <mxGeometry height="55" width="1160" x="70" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="l_edge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf2e9;strokeColor=#e07b39;fontStyle=1;fontSize=13;" value="Edge Layer: CDN + Global Load Balancer + WAF / Rate Limiter" vertex="1">
+          <mxGeometry height="55" width="1160" x="70" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_shorten" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Shortening&#xa;Service" vertex="1">
+          <mxGeometry height="80" width="180" x="70" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_redirect" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Redirect&#xa;Service" vertex="1">
+          <mxGeometry height="80" width="180" x="290" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_idgen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="ID Generation&#xa;Service" vertex="1">
+          <mxGeometry height="80" width="180" x="510" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_analytics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Analytics &amp;&#xa;Click-Tracking Service" vertex="1">
+          <mxGeometry height="80" width="180" x="730" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Account &amp; Auth&#xa;Service" vertex="1">
+          <mxGeometry height="80" width="180" x="950" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_label" parent="1" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#8a6d3b;align=left;" value="Application / Microservice Layer" vertex="1">
+          <mxGeometry height="20" width="300" x="70" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="data_cache" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontSize=12;" value="Redis Cache&#xa;(hot short_code → URL)" vertex="1">
+          <mxGeometry height="80" width="220" x="70" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="data_db" parent="1" style="cylinder3;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontSize=12;" value="Sharded SQL/NoSQL&#xa;URL Store" vertex="1">
+          <mxGeometry height="90" width="180" x="330" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="data_counter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontSize=12;" value="Distributed Counter /&#xa;Range Allocator (ZooKeeper)" vertex="1">
+          <mxGeometry height="80" width="220" x="550" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="data_stream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontSize=12;" value="Kafka Event Stream&#xa;(click events)" vertex="1">
+          <mxGeometry height="80" width="220" x="810" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="data_analytics_db" parent="1" style="cylinder3;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontSize=12;" value="Analytics&#xa;Warehouse" vertex="1">
+          <mxGeometry height="90" width="160" x="1050" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="data_label" parent="1" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#155e58;align=left;" value="Data &amp; Infrastructure Layer" vertex="1">
+          <mxGeometry height="20" width="300" x="70" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="l_client" target="l_edge" style="html=1;" />
+        <mxCell id="e2" edge="1" parent="1" source="l_edge" target="svc_shorten" style="html=1;" />
+        <mxCell id="e3" edge="1" parent="1" source="l_edge" target="svc_redirect" style="html=1;" />
+        <mxCell id="e4" edge="1" parent="1" source="svc_shorten" target="svc_idgen" style="html=1;" />
+        <mxCell id="e5" edge="1" parent="1" source="svc_redirect" target="svc_analytics" style="html=1;dashed=1;" />
+        <mxCell id="e6" edge="1" parent="1" source="svc_shorten" target="data_db" style="html=1;" />
+        <mxCell id="e7" edge="1" parent="1" source="svc_redirect" target="data_cache" style="html=1;" />
+        <mxCell id="e8" edge="1" parent="1" source="data_cache" target="data_db" style="html=1;" value="miss" />
+        <mxCell id="e9" edge="1" parent="1" source="svc_idgen" target="data_counter" style="html=1;" />
+        <mxCell id="e10" edge="1" parent="1" source="svc_analytics" target="data_stream" style="html=1;" />
+        <mxCell id="e11" edge="1" parent="1" source="data_stream" target="data_analytics_db" style="html=1;" />
+        <mxCell id="e12" edge="1" parent="1" source="svc_shorten" target="svc_user" style="html=1;dashed=1;" value="auth check" />
+        <mxCell id="notebox" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" value="Design notes:&#xa;• Services are independently deployable and horizontally scaled.&#xa;• Redirect Service is read-optimized and cache-first for low latency.&#xa;• Click analytics are decoupled via an event stream so redirects are never blocked by tracking." vertex="1">
+          <mxGeometry height="100" width="1160" x="70" y="580" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="data_model" name="3. Data Model &amp; Encoding">
+    <mxGraphModel dx="19412" dy="12432" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="d_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1b2a4a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=20;align=center;" value="Shorty — Data Model &amp; Base62 Encoding Scheme" vertex="1">
+          <mxGeometry height="55" width="1220" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_links" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fillColor=#eaf6f6;strokeColor=#1b7f79;" value="links" vertex="1">
+          <mxGeometry height="230" width="360" x="70" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="row0" parent="tbl_links" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="c0a" parent="row0" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;fontStyle=1;" value="short_code" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="c0b" parent="row0" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="VARCHAR(8) PK" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="row1" parent="tbl_links" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c1a" parent="row1" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="long_url" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="c1b" parent="row1" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="TEXT NOT NULL" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="row2" parent="tbl_links" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c2a" parent="row2" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="owner_id" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="c2b" parent="row2" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="BIGINT FK → users.id" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="row3" parent="tbl_links" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="c3a" parent="row3" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="created_at" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="c3b" parent="row3" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="TIMESTAMP" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="row4" parent="tbl_links" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="c4a" parent="row4" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="expires_at" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="c4b" parent="row4" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="TIMESTAMP NULLABLE" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="tbl_clicks" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fillColor=#fdf2e9;strokeColor=#e07b39;" value="click_events" vertex="1">
+          <mxGeometry height="190" width="360" x="500" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="crow0" parent="tbl_clicks" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cc0a" parent="crow0" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;fontStyle=1;" value="event_id" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cc0b" parent="crow0" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="UUID PK" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="crow1" parent="tbl_clicks" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="cc1a" parent="crow1" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="short_code" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cc1b" parent="crow1" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="VARCHAR(8) FK → links" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="crow2" parent="tbl_clicks" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cc2a" parent="crow2" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="clicked_at" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cc2b" parent="crow2" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="TIMESTAMP" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="crow3" parent="tbl_clicks" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;strokeColor=inherit;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fold=0;" vertex="1">
+          <mxGeometry height="40" width="360" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cc3a" parent="crow3" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="geo / user_agent" vertex="1">
+          <mxGeometry height="40" width="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cc3b" parent="crow3" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;" value="JSONB" vertex="1">
+          <mxGeometry height="40" width="180" x="180" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1" edge="1" parent="1" source="tbl_links" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=ERmany;startArrow=ERone;strokeColor=#666666;" target="tbl_clicks" value="1 : N">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="enc_title" parent="1" style="text;html=1;fontSize=14;fontStyle=1;align=left;fontColor=#1b2a4a;" value="Base62 Encoding — turning a numeric ID into a short code" vertex="1">
+          <mxGeometry height="25" width="600" x="70" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="enc1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Unique counter&#xa;id = 125,412,984" vertex="1">
+          <mxGeometry height="60" width="220" x="70" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="enc2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="Divide repeatedly by 62,&#xa;map remainder to [0-9a-zA-Z]" vertex="1">
+          <mxGeometry height="60" width="260" x="340" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="enc3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f8f0;strokeColor=#1b7f79;fontSize=12;fontStyle=1;" value="short_code =&#xa;&quot;8LqRz&quot;" vertex="1">
+          <mxGeometry height="60" width="220" x="650" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="ee1" edge="1" parent="1" source="enc1" style="html=1;" target="enc2" />
+        <mxCell id="ee2" edge="1" parent="1" source="enc2" style="html=1;" target="enc3" />
+        <mxCell id="enc_note" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" value="Why Base62? Alphabet of 62 characters (0-9, a-z, A-Z) is URL-safe with no escaping needed.&#xa;7 characters give 62^7 ≈ 3.5 trillion unique codes — enough headroom for years of growth.&#xa;Custom aliases bypass the encoder and are written directly after a uniqueness check." vertex="1">
+          <mxGeometry height="100" width="800" x="70" y="540" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="capacity_planning" name="4. Capacity Planning">
+    <mxGraphModel dx="1288" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cap_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1b2a4a;strokeColor=none;fontColor=#ffffff;fontStyle=1;fontSize=20;align=center;" value="Shorty — Capacity Planning (5-Year Horizon)" vertex="1">
+          <mxGeometry height="55" width="1220" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="assump_head" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf2e9;strokeColor=#e07b39;fontStyle=1;fontSize=13;align=left;spacingLeft=10;" value="Assumptions" vertex="1">
+          <mxGeometry height="40" width="560" x="70" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;align=left;spacingLeft=10;" value="500 million new short links created per month" vertex="1">
+          <mxGeometry height="45" width="560" x="70" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;align=left;spacingLeft=10;" value="Read : Write ratio of 100 : 1 (redirects dominate)" vertex="1">
+          <mxGeometry height="45" width="560" x="70" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;align=left;spacingLeft=10;" value="Each link record averages ~300 bytes with metadata" vertex="1">
+          <mxGeometry height="45" width="560" x="70" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;align=left;spacingLeft=10;" value="Links retained for 5 years by default" vertex="1">
+          <mxGeometry height="45" width="560" x="70" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#e07b39;fontSize=12;align=left;spacingLeft=10;" value="Traffic pattern: 3x peak multiplier over average during peak hours" vertex="1">
+          <mxGeometry height="45" width="560" x="70" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="calc_head" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf6f6;strokeColor=#1b7f79;fontStyle=1;fontSize=13;align=left;spacingLeft=10;" value="Derived Numbers" vertex="1">
+          <mxGeometry height="40" width="560" x="670" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;align=left;spacingLeft=10;" value="Writes/sec (avg) ≈ 500M / (30×86,400) ≈ 193" vertex="1">
+          <mxGeometry height="45" width="560" x="670" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;align=left;spacingLeft=10;" value="Reads/sec (avg) ≈ 193 × 100 ≈ 19,300" vertex="1">
+          <mxGeometry height="45" width="560" x="670" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;align=left;spacingLeft=10;" value="Peak reads/sec ≈ 19,300 × 3 ≈ 58,000" vertex="1">
+          <mxGeometry height="45" width="560" x="670" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;align=left;spacingLeft=10;" value="Storage/month ≈ 500M × 300B ≈ 150 GB" vertex="1">
+          <mxGeometry height="45" width="560" x="670" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b7f79;fontSize=12;align=left;spacingLeft=10;" value="Storage over 5 years ≈ 150GB × 60 ≈ 9 TB (+ index overhead)" vertex="1">
+          <mxGeometry height="45" width="560" x="670" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="infra_head" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dfe6f0;strokeColor=#1b2a4a;fontStyle=1;fontSize=13;align=left;spacingLeft=10;" value="Infrastructure Sizing Implications" vertex="1">
+          <mxGeometry height="40" width="1160" x="70" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b2a4a;fontSize=12;" value="Cache layer must serve ~58K reads/sec at peak → size Redis cluster for high QPS with sub-ms latency" vertex="1">
+          <mxGeometry height="60" width="1160" x="70" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b2a4a;fontSize=12;" value="9 TB dataset over 5 years → shard the DB by short_code hash across multiple nodes; plan for replication" vertex="1">
+          <mxGeometry height="60" width="1160" x="70" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#1b2a4a;fontSize=12;" value="ID generation range-allocator avoids a single point of contention as write volume grows" vertex="1">
+          <mxGeometry height="60" width="1160" x="70" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="cap_note" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=8;" value="These are order-of-magnitude planning numbers for a growth-stage product, not exact SLAs." vertex="1">
+          <mxGeometry height="45" width="1160" x="70" y="720" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
